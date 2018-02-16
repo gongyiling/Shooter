@@ -21,6 +21,7 @@
 
 #include "PxPhysicsAPI.h"
 #include "Physics.h"
+#include "CCT.h"
 
 using namespace physx;
 
@@ -33,38 +34,16 @@ PxPhysics*				gPhysics	= NULL;
 PxDefaultCpuDispatcher*	gDispatcher = NULL;
 PxScene*				gScene		= NULL;
 
+PxControllerManager*	gControllerManager = NULL;
+
 PxMaterial*				gMaterial	= NULL;
 
 PxVisualDebuggerConnection*		
 						gConnection	= NULL;
 
-PxReal stackZ = 10.0f;
+CCT*					gCCT = NULL;
 
-PxRigidDynamic* createDynamic(const PxTransform& t, const PxGeometry& geometry, const PxVec3& velocity=PxVec3(0))
-{
-	PxRigidDynamic* dynamic = PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, 10.0f);
-	dynamic->setAngularDamping(0.5f);
-	dynamic->setLinearVelocity(velocity);
-	gScene->addActor(*dynamic);
-	return dynamic;
-}
-
-void createStack(const PxTransform& t, PxU32 size, PxReal halfExtent)
-{
-	PxShape* shape = gPhysics->createShape(PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
-	for(PxU32 i=0; i<size;i++)
-	{
-		for(PxU32 j=0;j<size-i;j++)
-		{
-			PxTransform localTm(PxVec3(PxReal(j*2) - PxReal(size-i), PxReal(i*2+1), 0) * halfExtent);
-			PxRigidDynamic* body = gPhysics->createRigidDynamic(t.transform(localTm));
-			body->attachShape(*shape);
-			PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
-			gScene->addActor(*body);
-		}
-	}
-	shape->release();
-}
+void createScene();
 
 void initPhysics(bool interactive)
 {
@@ -83,19 +62,32 @@ void initPhysics(bool interactive)
 	createScene();
 }
 
-void createMaze()
+void createArena()
 {
 	// create playground
-	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
-	gScene->addActor(*groundPlane);
+	gScene->addActor(*PxCreateStatic(*gPhysics, PxTransform(PxIdentity), PxBoxGeometry(10, 0.1, 10), *gMaterial));
 
+	PxBoxGeometry box(0.5f, 0.5f, 10);
+	for (int i = 0; i < 4; i++)
+	{
+		PxTransform transform;
+		transform.q = PxQuat(PxHalfPi * i, PxVec3(0, 1, 0));
+		transform.p = transform.q.rotate(PxVec3(10, 0, 0));
+		PxTransform offset(PxVec3(0, 0.5, 0), PxQuat(PxIdentity));
+		gScene->addActor(*PxCreateStatic(*gPhysics, transform, box, *gMaterial, offset));
+	}
+}
 
+void createCharacterController()
+{
+	gCCT = new CCT();
+	gCCT->Init();
 }
 
 void createScene()
 {
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	sceneDesc.gravity = getGravity();
 	gDispatcher = PxDefaultCpuDispatcherCreate(2);
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
@@ -103,15 +95,20 @@ void createScene()
 
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
-	createMaze();
+	gControllerManager = PxCreateControllerManager(*gScene);
+	createArena();
+	createCharacterController();
 }
 
 
 void stepPhysics(bool interactive)
 {
 	PX_UNUSED(interactive);
-	gScene->simulate(1.0f/60.0f);
+	float dt = 1 / 60.f;
+	gCCT->Step(dt);
+	gScene->simulate(dt);
 	gScene->fetchResults(true);
+	
 }
 	
 void cleanupPhysics(bool interactive)
@@ -129,11 +126,21 @@ void cleanupPhysics(bool interactive)
 	printf("SnippetHelloWorld done.\n");
 }
 
-void keyPress(const char key, const PxTransform& camera)
+PxController* createController()
 {
-	switch(toupper(key))
-	{
-	case 'B':	createStack(PxTransform(PxVec3(0,0,stackZ-=10.0f)), 10, 2.0f);						break;
-	case ' ':	createDynamic(camera, PxSphereGeometry(3.0f), camera.rotate(PxVec3(0,0,-1))*200);	break;
-	}
+	PxCapsuleControllerDesc desc;
+	desc.radius = 0.5f;
+	desc.height = 2 - desc.radius * 2;
+	desc.stepOffset = 0.2f;
+	desc.slopeLimit = PxCos(PxHalfPi * 0.5f);
+	desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
+	desc.material = gMaterial;
+	return gControllerManager->createController(desc);
 }
+
+PxVec3 getGravity()
+{
+	return PxVec3(0, -9.81f, 0);
+}
+
+

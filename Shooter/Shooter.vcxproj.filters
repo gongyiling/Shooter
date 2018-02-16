@@ -28,6 +28,9 @@
     <ClInclude Include="..\Main\Physics.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="..\Main\CCT.h">
+      <Filter>Main</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Render\Camera.cpp">
@@ -43,6 +46,9 @@
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="..\Main\Main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Main\CCT.cpp">
       <Filter>Main</Filter>
     </ClCompile>
   </ItemGroup>

@@ -152,12 +152,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Main\CCT.h" />
     <ClInclude Include="..\Main\Physics.h" />
     <ClInclude Include="..\Main\RenderLoop.h" />
     <ClInclude Include="..\Render\Camera.h" />
     <ClInclude Include="..\Render\Render.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Main\CCT.cpp" />
     <ClCompile Include="..\Main\Main.cpp" />
     <ClCompile Include="..\Main\Physics.cpp" />
     <ClCompile Include="..\Main\RenderLoop.cpp" />
