@@ -1,5 +1,6 @@
 #include "CCT.h"
 #include "Physics.h"
+#include "Projectile.h"
 
 PxController* CCT::CreateController()
 {
@@ -23,19 +24,17 @@ void CCT::Init(PxVec3 spawn_position, int layer)
 	PxShape* shape = NULL;
 	m_cct->getActor()->getShapes(&shape, 1);
 	
-	PxFilterData filter_data;
-	m_layer = layer;
-	filter_data.word0 = 1 << m_layer;
-	shape->setQueryFilterData(filter_data);
+	setLayer(shape, m_layer);
 	shape->userData = this;
 	m_direction = FindRandomDirection();
+	m_layer = layer;
 
 	m_cd = 0;
 }
 
 void CCT::Step(float dt)
 {
-	float speed = 0.2f;
+	float speed = 5;
 	PxVec3 disp = m_direction * dt * speed;
 	disp.y = -0.1f;
 	PxControllerFilters filters;
@@ -64,7 +63,7 @@ void CCT::Shoot(float dt)
 {
 	if (m_cd <= 0)
 	{
-		m_cd = 1;
+		m_cd = 5;
 	}
 	m_cd -= dt;
 	if (m_cd > 0)
@@ -74,7 +73,8 @@ void CCT::Shoot(float dt)
 	else
 	{
 		DoShoot();
-	}	
+		DoProjectile();
+	}
 }
 
 void CCT::DoShoot()
@@ -99,7 +99,7 @@ void CCT::DoShoot()
 		}
 		PxFilterData filter_data = hit.block.shape->getQueryFilterData();
 		int layer_mask = (1 << LT_LAYER0) | (1 << LT_LAYER1);
-		if (query_filter_data.data.word0 & layer_mask)
+		if (filter_data.word0 & layer_mask)
 		{
 			CCT* other = (CCT*)hit.block.shape->userData;
 			other->Destroy();
@@ -107,6 +107,23 @@ void CCT::DoShoot()
 		}
 	}
 }
+
+void CCT::DoProjectile()
+{
+	Projectile* projectile = new Projectile();
+	PxVec3 direction = m_direction;
+
+	// x1 * x1 + z1 * z1 = 1
+	// x2 * x2 + z2 * z2 = 1 - y2 * y2
+
+	direction.y = PxSin(90.0f / 180 * PxPi);
+	float n = PxSqrt(1 - direction.y * direction.y);
+	direction.x *= n;
+	direction.z *= n;
+	PxVec3 velocity = direction * 5;
+	projectile->Init(toVec3(m_cct->getPosition()) + PxVec3(0, 2, 0), m_layer, velocity);
+}
+
 void CCT::Destroy()
 {
 	auto it = std::find(gCCTs.begin(), gCCTs.end(), this);
@@ -117,4 +134,3 @@ void CCT::Destroy()
 		delete this;
 	}
 }
-

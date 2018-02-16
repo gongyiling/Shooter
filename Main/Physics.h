@@ -18,8 +18,11 @@ enum LayerType
 	LT_LAYER1 = 2,
 };
 
+extern int gCollisionMatrix[];
+
 void initPhysics(bool interactive);
 void stepPhysics(bool interactive);
 void cleanupPhysics(bool interactive);
+void setLayer(PxShape* shape, int layer);
 
 PxVec3 getGravity();

@@ -44,6 +44,10 @@ PxVisualDebuggerConnection*
 
 std::vector<CCT*>					gCCTs;
 
+int gCollisionMatrix[] = { -1, 
+							-1 & ~(1 << LT_LAYER0),
+							-1 & ~(1 << LT_LAYER1), };
+
 void createScene();
 
 void initPhysics(bool interactive)
@@ -75,9 +79,7 @@ void setArenaLayer()
 		actor->getShapes(&shapes[0], shapes.size());
 		for (size_t j = 0; j < shapes.size(); j++)
 		{
-			PxFilterData filter_data;
-			filter_data.word0 = 1 << LT_OBSTACLE;
-			shapes[j]->setQueryFilterData(filter_data);
+			setLayer(shapes[j], LT_OBSTACLE);
 		}
 	}
 }
@@ -115,13 +117,90 @@ void createCharacterController()
 	gCCTs.push_back(cct);
 }
 
+class SimulationEventCallback : public PxSimulationEventCallback
+{
+public:
+
+	virtual void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count)
+	{
+	}
+
+
+	virtual void onWake(PxActor** actors, PxU32 count)
+	{
+
+	}
+
+	virtual void onSleep(PxActor** actors, PxU32 count)
+	{
+
+	}
+
+	virtual void onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 nbPairs)
+	{
+		for (PxU32 i = 0; i < nbPairs; i++)
+		{
+			const PxContactPair& pair = pairs[i];
+			if (pair.events.isSet(PxPairFlag::eNOTIFY_TOUCH_FOUND))
+			{
+				Collider* first = (Collider*)pair.shapes[0]->userData;
+				Collider* second = (Collider*)pair.shapes[1]->userData;
+				if (first != NULL || second != NULL)
+				{
+					colliders_enter.push_back(std::make_pair(first, second));
+				}
+			}
+		}
+	}
+
+
+	virtual void onTrigger(PxTriggerPair* pairs, PxU32 count)
+	{
+
+	}
+
+	void Clear()
+	{
+		colliders_enter.clear();
+	}
+
+	std::vector<std::pair<Collider*, Collider*>> colliders_enter;
+};
+
+SimulationEventCallback gCallback;
+PxFilterFlags MySimulateFilterShader(PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
+{
+	if (!(filterData0.word0 & filterData1.word1))
+	{
+		return PxFilterFlag::eKILL;
+	}
+
+	if (!(filterData0.word1 & filterData1.word0))
+	{
+		return PxFilterFlag::eKILL;
+	}
+
+	if (PxFilterObjectIsTrigger(attributes0) || PxFilterObjectIsTrigger(attributes1))
+	{
+		pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+		return PxFilterFlag::eDEFAULT;
+	}
+
+	pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+	return PxFilterFlag::eDEFAULT;
+}
+
 void createScene()
 {
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = getGravity();
-	gDispatcher = PxDefaultCpuDispatcherCreate(2);
+	gDispatcher = PxDefaultCpuDispatcherCreate(0);
 	sceneDesc.cpuDispatcher = gDispatcher;
-	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+	//sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+	sceneDesc.filterShader = MySimulateFilterShader;
+	sceneDesc.simulationEventCallback = &gCallback;
 	gScene = gPhysics->createScene(sceneDesc);
 
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
@@ -131,19 +210,38 @@ void createScene()
 	createCharacterController();
 }
 
+void processSimulateEvent()
+{
+	for (size_t i = 0; i < gCallback.colliders_enter.size(); i++)
+	{
+		std::pair<Collider*, Collider*> p = gCallback.colliders_enter[i];
+		if (p.first != NULL)
+		{
+			p.first->OnCollisionEnter(p.second);
+		}
+		if (p.second != NULL)
+		{
+			p.second->OnCollisionEnter(p.first);
+		}
+	}
+}
 
 void stepPhysics(bool interactive)
 {
 	PX_UNUSED(interactive);
-	float dt = 1 / 60.f;
+	float dt = 1 / 30.0f;
 	for (size_t i = 0; i < gCCTs.size(); i++)
 	{
 		gCCTs[i]->Step(dt);
 	}
+	gCallback.Clear();
+
 	gScene->simulate(dt);
 	gScene->fetchResults(true);
-	
+
+	processSimulateEvent();
 }
+
 	
 void cleanupPhysics(bool interactive)
 {
@@ -158,6 +256,15 @@ void cleanupPhysics(bool interactive)
 	gFoundation->release();
 	
 	printf("SnippetHelloWorld done.\n");
+}
+
+void setLayer(PxShape* shape, int layer)
+{
+	PxFilterData filter_data;
+	filter_data.word0 = 1 << layer;
+	shape->setQueryFilterData(filter_data);
+	filter_data.word1 = gCollisionMatrix[layer];
+	shape->setSimulationFilterData(filter_data);
 }
 
 PxVec3 getGravity()

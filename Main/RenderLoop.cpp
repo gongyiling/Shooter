@@ -40,8 +40,24 @@ void mouseCallback(int button, int state, int x, int y)
 	sCamera->handleMouse(button, state, x, y);
 }
 
+static GLfloat deltaT;
+
 void idleCallback()
 {
+	static GLuint previousClock = glutGet(GLUT_ELAPSED_TIME);
+	static GLuint currentClock = glutGet(GLUT_ELAPSED_TIME);
+
+	currentClock = glutGet(GLUT_ELAPSED_TIME);
+	deltaT = currentClock - previousClock;
+	if (deltaT < 10)
+	{
+		return;
+	}
+	else 
+	{ 
+		previousClock = currentClock; 
+	}
+
 	glutPostRedisplay();
 }
 
