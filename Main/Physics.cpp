@@ -80,24 +80,32 @@ void initPhysics(bool interactive)
 		gConnection = PxVisualDebuggerExt::createConnection(gPhysics->getPvdConnectionManager(), "127.0.0.1", 5425, 10);
 	}
 
+	createScene();
+}
+
+void createMaze()
+{
+	// create playground
+	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
+	gScene->addActor(*groundPlane);
+
+
+}
+
+void createScene()
+{
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
 	gDispatcher = PxDefaultCpuDispatcherCreate(2);
-	sceneDesc.cpuDispatcher	= gDispatcher;
-	sceneDesc.filterShader	= PxDefaultSimulationFilterShader;
+	sceneDesc.cpuDispatcher = gDispatcher;
+	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 	gScene = gPhysics->createScene(sceneDesc);
 
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
-	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0,1,0,0), *gMaterial);
-	gScene->addActor(*groundPlane);
-
-	for(PxU32 i=0;i<5;i++)
-		createStack(PxTransform(PxVec3(0,0,stackZ-=10.0f)), 10, 2.0f);
-
-	if(!interactive)
-		createDynamic(PxTransform(PxVec3(0,40,100)), PxSphereGeometry(10), PxVec3(0,-50,-100));
+	createMaze();
 }
+
 
 void stepPhysics(bool interactive)
 {
