@@ -1,9 +1,21 @@
 #include "CCT.h"
 #include "Physics.h"
-void CCT::Init()
+void CCT::Init(PxVec3 spawn_position, int layer)
 {
 	m_cct = createController();
+	PxExtendedVec3 pos(spawn_position.x, spawn_position.y, spawn_position.z);
+	m_cct->setFootPosition(pos);
+
+	PxShape* shape = NULL;
+	m_cct->getActor()->getShapes(&shape, 1);
+	
+	PxFilterData filter_data;
+	filter_data.word0 = 1 << layer;
+	shape->setQueryFilterData(filter_data);
+
 	m_direction = FindRandomDirection();
+
+	m_cd = 0;
 }
 
 void CCT::Step(float dt)
@@ -30,5 +42,10 @@ PxVec3 CCT::FindRandomDirection()
 	d.x = Random11();
 	d.z = Random11();
 	return d.getNormalized();
+}
+
+void CCT::Shoot(float dt)
+{
+
 }
 

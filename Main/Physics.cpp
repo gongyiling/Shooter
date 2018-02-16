@@ -22,6 +22,7 @@
 #include "PxPhysicsAPI.h"
 #include "Physics.h"
 #include "CCT.h"
+#include <vector>
 
 using namespace physx;
 
@@ -41,7 +42,7 @@ PxMaterial*				gMaterial	= NULL;
 PxVisualDebuggerConnection*		
 						gConnection	= NULL;
 
-CCT*					gCCT = NULL;
+std::vector<CCT*>					gCCTs;
 
 void createScene();
 
@@ -67,21 +68,37 @@ void createArena()
 	// create playground
 	gScene->addActor(*PxCreateStatic(*gPhysics, PxTransform(PxIdentity), PxBoxGeometry(10, 0.1, 10), *gMaterial));
 
-	PxBoxGeometry box(0.5f, 0.5f, 10);
+	PxTransform offset(PxVec3(0, 0.5, 0), PxQuat(PxIdentity));
+	PxBoxGeometry bound(0.5f, 0.5f, 10);
 	for (int i = 0; i < 4; i++)
 	{
 		PxTransform transform;
 		transform.q = PxQuat(PxHalfPi * i, PxVec3(0, 1, 0));
 		transform.p = transform.q.rotate(PxVec3(10, 0, 0));
-		PxTransform offset(PxVec3(0, 0.5, 0), PxQuat(PxIdentity));
-		gScene->addActor(*PxCreateStatic(*gPhysics, transform, box, *gMaterial, offset));
+		
+		gScene->addActor(*PxCreateStatic(*gPhysics, transform, bound, *gMaterial, offset));
 	}
+
+	PxBoxGeometry obstacle(0.5f, 0.5f, 6);
+	gScene->addActor(*PxCreateStatic(*gPhysics, PxTransform(PxIdentity), obstacle, *gMaterial, offset));
 }
+
+enum LayerType
+{
+	LT_LAYER0 = 0,
+	LT_LAYER1 = 1,
+};
 
 void createCharacterController()
 {
-	gCCT = new CCT();
-	gCCT->Init();
+	CCT* cct = new CCT();
+
+	cct->Init(PxVec3(5, 0, 0), LT_LAYER0);
+	gCCTs.push_back(cct);
+
+	cct = new CCT();
+	cct->Init(PxVec3(-5, 0, 0), LT_LAYER1);
+	gCCTs.push_back(cct);
 }
 
 void createScene()
@@ -105,7 +122,10 @@ void stepPhysics(bool interactive)
 {
 	PX_UNUSED(interactive);
 	float dt = 1 / 60.f;
-	gCCT->Step(dt);
+	for (size_t i = 0; i < gCCTs.size(); i++)
+	{
+		gCCTs[i]->Step(dt);
+	}
 	gScene->simulate(dt);
 	gScene->fetchResults(true);
 	
