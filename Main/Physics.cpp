@@ -63,31 +63,45 @@ void initPhysics(bool interactive)
 	createScene();
 }
 
+void setArenaLayer()
+{
+	std::vector<PxActor*> actors(gScene->getNbActors(PxActorTypeFlag::eRIGID_STATIC));
+	gScene->getActors(PxActorTypeFlag::eRIGID_STATIC, &actors[0], actors.size());
+
+	for (size_t i = 0; i < actors.size(); i++)
+	{
+		PxRigidActor* actor = actors[i]->isRigidActor();
+		std::vector<PxShape*> shapes(actor->getNbShapes());
+		actor->getShapes(&shapes[0], shapes.size());
+		for (size_t j = 0; j < shapes.size(); j++)
+		{
+			PxFilterData filter_data;
+			filter_data.word0 = 1 << LT_OBSTACLE;
+			shapes[j]->setQueryFilterData(filter_data);
+		}
+	}
+}
+
 void createArena()
 {
 	// create playground
 	gScene->addActor(*PxCreateStatic(*gPhysics, PxTransform(PxIdentity), PxBoxGeometry(10, 0.1, 10), *gMaterial));
 
-	PxTransform offset(PxVec3(0, 0.5, 0), PxQuat(PxIdentity));
-	PxBoxGeometry bound(0.5f, 0.5f, 10);
+	PxTransform offset(PxVec3(0, 1, 0), PxQuat(PxIdentity));
+	PxBoxGeometry bound(1, 1, 10);
 	for (int i = 0; i < 4; i++)
 	{
 		PxTransform transform;
 		transform.q = PxQuat(PxHalfPi * i, PxVec3(0, 1, 0));
 		transform.p = transform.q.rotate(PxVec3(10, 0, 0));
-		
 		gScene->addActor(*PxCreateStatic(*gPhysics, transform, bound, *gMaterial, offset));
 	}
 
-	PxBoxGeometry obstacle(0.5f, 0.5f, 6);
+	PxBoxGeometry obstacle(1, 1, 6);
 	gScene->addActor(*PxCreateStatic(*gPhysics, PxTransform(PxIdentity), obstacle, *gMaterial, offset));
+	
+	setArenaLayer();
 }
-
-enum LayerType
-{
-	LT_LAYER0 = 0,
-	LT_LAYER1 = 1,
-};
 
 void createCharacterController()
 {
@@ -144,18 +158,6 @@ void cleanupPhysics(bool interactive)
 	gFoundation->release();
 	
 	printf("SnippetHelloWorld done.\n");
-}
-
-PxController* createController()
-{
-	PxCapsuleControllerDesc desc;
-	desc.radius = 0.5f;
-	desc.height = 2 - desc.radius * 2;
-	desc.stepOffset = 0.2f;
-	desc.slopeLimit = PxCos(PxHalfPi * 0.5f);
-	desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
-	desc.material = gMaterial;
-	return gControllerManager->createController(desc);
 }
 
 PxVec3 getGravity()
