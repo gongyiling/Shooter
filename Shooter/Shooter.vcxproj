@@ -152,6 +152,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Main\Physics.h" />
     <ClInclude Include="..\Main\RenderLoop.h" />
     <ClInclude Include="..\Render\Camera.h" />
     <ClInclude Include="..\Render\Render.h" />

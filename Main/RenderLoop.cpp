@@ -17,17 +17,9 @@
 
 #include "../Render/Render.h"
 #include "../Render/Camera.h"
-
+#include "Physics.h"
 using namespace physx;
 
-extern void initPhysics(bool interactive);
-extern void stepPhysics(bool interactive);	
-extern void cleanupPhysics(bool interactive);
-extern void keyPress(const char key, const PxTransform& camera);
-
-
-namespace
-{
 Renderer::Camera*	sCamera;
 
 void motionCallback(int x, int y)
@@ -77,7 +69,6 @@ void exitCallback(void)
 {
 	delete sCamera;
 	cleanupPhysics(true);
-}
 }
 
 void renderLoop()

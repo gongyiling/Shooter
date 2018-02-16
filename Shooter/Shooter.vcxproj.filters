@@ -25,6 +25,9 @@
     <ClInclude Include="..\Main\RenderLoop.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="..\Main\Physics.h">
+      <Filter>Main</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Render\Camera.cpp">
