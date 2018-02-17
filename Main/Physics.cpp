@@ -188,7 +188,7 @@ PxFilterFlags MySimulateFilterShader(PxFilterObjectAttributes attributes0, PxFil
 		return PxFilterFlag::eDEFAULT;
 	}
 
-	pairFlags = PxPairFlag::eTRIGGER_DEFAULT | PxPairFlag::eSOLVE_CONTACT;
+	pairFlags = PxPairFlag::eTRIGGER_DEFAULT | PxPairFlag::eSOLVE_CONTACT | PxPairFlag::eDETECT_CCD_CONTACT;
 	return PxFilterFlag::eDEFAULT;
 }
 
@@ -200,6 +200,7 @@ void createScene()
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = MySimulateFilterShader;
 	sceneDesc.simulationEventCallback = &gCallback;
+	sceneDesc.flags |= PxSceneFlag::eENABLE_CCD;
 	gScene = gPhysics->createScene(sceneDesc);
 
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
