@@ -10,6 +10,7 @@ void Projectile::Init(PxVec3 spawn_position, int layer, PxVec3 velocity)
 	setLayer(shape, layer);
 	m_rigid_dynamic->setLinearVelocity(velocity);
 	m_rigid_dynamic->userData = this;
+	//m_rigid_dynamic->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD, true);
 	shape->userData = this;
 	gScene->addActor(*m_rigid_dynamic);
 }
@@ -21,7 +22,7 @@ void Projectile::Step(float dt)
 
 void Projectile::OnCollisionEnter(Collider* other)
 {
-	//Destroy();
+	Destroy();
 }
 
 void Projectile::Destroy()

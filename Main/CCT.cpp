@@ -24,7 +24,7 @@ void CCT::Init(PxVec3 spawn_position, int layer)
 	PxShape* shape = NULL;
 	m_cct->getActor()->getShapes(&shape, 1);
 	
-	setLayer(shape, m_layer);
+	setLayer(shape, layer);
 	shape->userData = this;
 	m_direction = FindRandomDirection();
 	m_layer = layer;
@@ -120,8 +120,8 @@ void CCT::DoProjectile()
 	float n = PxSqrt(1 - direction.y * direction.y);
 	direction.x *= n;
 	direction.z *= n;
-	PxVec3 velocity = direction * 5;
-	projectile->Init(toVec3(m_cct->getPosition()) + PxVec3(0, 2, 0), m_layer, velocity);
+	PxVec3 velocity = direction * 20;
+	projectile->Init(toVec3(m_cct->getPosition()), m_layer, velocity);
 }
 
 void CCT::Destroy()

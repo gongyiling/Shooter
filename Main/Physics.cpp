@@ -188,7 +188,7 @@ PxFilterFlags MySimulateFilterShader(PxFilterObjectAttributes attributes0, PxFil
 		return PxFilterFlag::eDEFAULT;
 	}
 
-	pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+	pairFlags = PxPairFlag::eTRIGGER_DEFAULT | PxPairFlag::eSOLVE_CONTACT;
 	return PxFilterFlag::eDEFAULT;
 }
 
@@ -198,7 +198,6 @@ void createScene()
 	sceneDesc.gravity = getGravity();
 	gDispatcher = PxDefaultCpuDispatcherCreate(0);
 	sceneDesc.cpuDispatcher = gDispatcher;
-	//sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 	sceneDesc.filterShader = MySimulateFilterShader;
 	sceneDesc.simulationEventCallback = &gCallback;
 	gScene = gPhysics->createScene(sceneDesc);
