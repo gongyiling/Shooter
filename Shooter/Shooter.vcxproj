@@ -162,11 +162,13 @@
   <ItemGroup>
     <ClInclude Include="..\Main\CCT.h" />
     <ClInclude Include="..\Main\Collider.h" />
+    <ClInclude Include="..\Main\Door.h" />
     <ClInclude Include="..\Main\Physics.h" />
     <ClInclude Include="..\Main\Projectile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Main\CCT.cpp" />
+    <ClCompile Include="..\Main\Door.cpp" />
     <ClCompile Include="..\Main\Main.cpp" />
     <ClCompile Include="..\Main\Physics.cpp" />
     <ClCompile Include="..\Main\Projectile.cpp" />

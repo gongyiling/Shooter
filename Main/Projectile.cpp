@@ -28,4 +28,6 @@ void Projectile::OnCollisionEnter(Collider* other)
 void Projectile::Destroy()
 {
 	gScene->removeActor(*m_rigid_dynamic);
+	m_rigid_dynamic->release();
+	// TODO delete this point.
 }

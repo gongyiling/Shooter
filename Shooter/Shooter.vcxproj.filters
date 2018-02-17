@@ -25,6 +25,9 @@
     <ClInclude Include="..\Main\Collider.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="..\Main\Door.h">
+      <Filter>Main</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Main\Physics.cpp">
@@ -37,6 +40,9 @@
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="..\Main\Projectile.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Main\Door.cpp">
       <Filter>Main</Filter>
     </ClCompile>
   </ItemGroup>

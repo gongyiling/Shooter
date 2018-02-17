@@ -23,6 +23,7 @@
 #include "Physics.h"
 #include "CCT.h"
 #include <vector>
+#include "Door.h"
 
 using namespace physx;
 
@@ -44,6 +45,8 @@ PxVisualDebuggerConnection*
 
 std::vector<CCT*>					gCCTs;
 
+Door*					gDoor = NULL;
+
 int gCollisionMatrix[] = { -1, 
 							-1 & ~(1 << LT_LAYER0),
 							-1 & ~(1 << LT_LAYER1), };
@@ -63,7 +66,7 @@ void initPhysics()
 		gPhysics->getVisualDebugger()->setVisualDebuggerFlag(PxVisualDebuggerFlag::eTRANSMIT_SCENEQUERIES, true);
 		gConnection = PxVisualDebuggerExt::createConnection(gPhysics->getPvdConnectionManager(), "127.0.0.1", 5425, 10);
 	}
-
+	PxInitExtensions(*gPhysics);
 	createScene();
 }
 
@@ -103,6 +106,9 @@ void createArena()
 	gScene->addActor(*PxCreateStatic(*gPhysics, PxTransform(PxIdentity), obstacle, *gMaterial, offset));
 	
 	setArenaLayer();
+
+	gDoor = new Door();
+	gDoor->Init(PxVec3(0, 0, 7.5f), LT_OBSTACLE);
 }
 
 void createCharacterController()
@@ -202,6 +208,8 @@ void createScene()
 	sceneDesc.simulationEventCallback = &gCallback;
 	sceneDesc.flags |= PxSceneFlag::eENABLE_CCD;
 	gScene = gPhysics->createScene(sceneDesc);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eJOINT_LOCAL_FRAMES, 1.0f);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eJOINT_LIMITS, 1.0f);
 
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
