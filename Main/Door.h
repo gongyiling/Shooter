@@ -12,5 +12,4 @@ public:
 private:
 	PxRigidDynamic* m_door = NULL;
 	PxRevoluteJoint* m_joint = NULL;
-	bool m_closed = true;
 };

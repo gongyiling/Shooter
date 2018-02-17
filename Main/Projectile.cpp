@@ -13,6 +13,8 @@ void Projectile::Init(PxVec3 spawn_position, int layer, PxVec3 velocity)
 	m_rigid_dynamic->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD, true);
 	shape->userData = this;
 	gScene->addActor(*m_rigid_dynamic);
+
+	m_type = "Projectile";
 }
 
 void Projectile::Step(float dt)

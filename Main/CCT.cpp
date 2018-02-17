@@ -1,6 +1,7 @@
 #include "CCT.h"
 #include "Physics.h"
 #include "Projectile.h"
+#include "Door.h"
 
 PxController* CCT::CreateController()
 {
@@ -12,6 +13,7 @@ PxController* CCT::CreateController()
 	desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
 	desc.material = gMaterial;
 	desc.userData = this;
+	desc.reportCallback = this;
 	return gControllerManager->createController(desc);
 }
 
@@ -30,6 +32,7 @@ void CCT::Init(PxVec3 spawn_position, int layer)
 	m_layer = layer;
 
 	m_cd = 0;
+	m_type = "CCT";
 }
 
 void CCT::Step(float dt)
@@ -38,6 +41,9 @@ void CCT::Step(float dt)
 	PxVec3 disp = m_direction * dt * speed;
 	disp.y = -0.1f;
 	PxControllerFilters filters;
+	PxFilterData filter_data;
+	filter_data.word0 = gCollisionMatrix[m_layer];
+	filters.mFilterData = &filter_data;
 	PxControllerCollisionFlags flags = m_cct->move(disp, 0.001, dt, filters);
 	if (flags.isSet(PxControllerCollisionFlag::eCOLLISION_SIDES))
 	{
@@ -122,6 +128,29 @@ void CCT::DoProjectile()
 	direction.z *= n;
 	PxVec3 velocity = direction * 20;
 	projectile->Init(toVec3(m_cct->getPosition()), m_layer, velocity);
+}
+
+void CCT::onShapeHit(const PxControllerShapeHit& hit)
+{
+	Collider* collider = (Collider*)hit.shape->userData;
+	if (collider != NULL)
+	{
+		if (collider->m_type == "Door")
+		{
+			Door* door = (Door*)collider;
+			door->OpenDoor();
+		}
+	}
+}
+
+void CCT::onControllerHit(const PxControllersHit& hit)
+{
+
+}
+
+void CCT::onObstacleHit(const PxControllerObstacleHit& hit)
+{
+
 }
 
 void CCT::Destroy()
