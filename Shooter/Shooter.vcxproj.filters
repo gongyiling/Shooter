@@ -5,9 +5,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Renderer">
-      <UniqueIdentifier>{7735dc8f-eb43-4951-ac00-3e27dd2f0750}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Main">
       <UniqueIdentifier>{380a07e5-f8c0-4ed6-a981-e4cd3b03b60d}</UniqueIdentifier>
     </Filter>
@@ -16,15 +13,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Render\Camera.h">
-      <Filter>Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Render\Render.h">
-      <Filter>Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Main\RenderLoop.h">
-      <Filter>Main</Filter>
-    </ClInclude>
     <ClInclude Include="..\Main\Physics.h">
       <Filter>Main</Filter>
     </ClInclude>
@@ -39,15 +27,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Render\Camera.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Render\Render.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Main\RenderLoop.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
     <ClCompile Include="..\Main\Physics.cpp">
       <Filter>Main</Filter>
     </ClCompile>

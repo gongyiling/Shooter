@@ -50,7 +50,7 @@ int gCollisionMatrix[] = { -1,
 
 void createScene();
 
-void initPhysics(bool interactive)
+void initPhysics()
 {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 	PxProfileZoneManager* profileZoneManager = &PxProfileZoneManager::createProfileZoneManager(gFoundation);
@@ -226,10 +226,8 @@ void processSimulateEvent()
 	}
 }
 
-void stepPhysics(bool interactive)
+void stepPhysics(float dt)
 {
-	PX_UNUSED(interactive);
-	float dt = 1 / 30.0f;
 	for (size_t i = 0; i < gCCTs.size(); i++)
 	{
 		gCCTs[i]->Step(dt);
@@ -243,9 +241,9 @@ void stepPhysics(bool interactive)
 }
 
 	
-void cleanupPhysics(bool interactive)
+void cleanupPhysics()
 {
-	PX_UNUSED(interactive);
+	gControllerManager->release();
 	gScene->release();
 	gDispatcher->release();
 	PxProfileZoneManager* profileZoneManager = gPhysics->getProfileZoneManager();

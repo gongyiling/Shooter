@@ -20,9 +20,9 @@ enum LayerType
 
 extern int gCollisionMatrix[];
 
-void initPhysics(bool interactive);
-void stepPhysics(bool interactive);
-void cleanupPhysics(bool interactive);
+void initPhysics();
+void stepPhysics(float dt);
+void cleanupPhysics();
 void setLayer(PxShape* shape, int layer);
 
 PxVec3 getGravity();
