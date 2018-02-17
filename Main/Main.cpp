@@ -1,4 +1,3 @@
-#include "RenderLoop.h"
 #include "Physics.h"
 #include <Windows.h>
 
